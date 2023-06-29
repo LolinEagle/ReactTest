@@ -1,87 +1,76 @@
-const scaleNames = {
-	c: 'Celsius',
-	f: 'Fahrenheit'
-}
+const PRODUCT = [
+	{category: "Sporting Goods", price: "$49.99", stocked: true, name: "Football"},
+	{category: "Sporting Goods", price: "$9.99", stocked: true, name: "Baseball"},
+	{category: "Sporting Goods", price: "$29.99", stocked: false, name: "Basketball"},
+	{category: "Electronics", price: "$99.99", stocked: true, name: "iPod Touch"},
+	{category: "Electronics", price: "$399.99", stocked: false, name: "iPhone 5"},
+	{category: "Electronics", price: "$199.99", stocked: true, name: "Nexus 7"}
+]
 
-function toCelsius(fahrenheit){
-	return ((fahrenheit - 32) * 5 / 9)
-}
-
-function toFahrenheit(celsius){
-	return ((celsius * 9 / 5) + 32)
-}
-
-function BoilingVerdict({celsius, fahrenheit}){
-	if (celsius >= 100){
-		return (<div className="alert alert-success">
-			À {celsius}°C / {fahrenheit}°F L'eau bout.
-		</div>)
-	}
-	return (<div className="alert alert-info">
-		À {celsius}°C / {fahrenheit}°F L'eau ne bout pas.
-	</div>)
-}
-
-class TemperatureInput extends React.Component{
-	constructor(props){
-		super(props)
-		this.handleChange = this.handleChange.bind(this)
-	}
-
-	handleChange(e){
-		this.props.onTemperatureChange(e.target.value)
-	}
-
+class SearchBar extends React.Component{
 	render(){
-		const {temperature} = this.props
-		const name = "scale" + this.props.scale
-		const scaleName = scaleNames[this.props.scale]
-		
-		return (
-			<div className="form-group">
-				<label htmlFor={name}>Temperature (en {scaleName})</label>
-				<input type="text" id={name} value={temperature} className="form-control"
-					onChange={this.handleChange}></input>
-			</div>
-		)
-	}
-}
-
-class Calculator extends React.Component{
-	constructor(props){
-		super(props)
-		this.state = {scale: 'c', temperature: 0}
-		this.handleTemperatureChangeC = this.handleTemperatureChangeC.bind(this)
-		this.handleTemperatureChangeF = this.handleTemperatureChangeF.bind(this)
-	}
-
-	handleTemperatureChangeC(temperature){
-		this.setState({
-			scale: 'c',
-			temperature
-		})
-	}
-
-	handleTemperatureChangeF(temperature){
-		this.setState({
-			scale: 'f',
-			temperature
-		})
-	}
-
-	render(){
-		const {temperature, scale} = this.state
-		const celsius = scale === 'c' ? temperature : toCelsius(temperature)
-		const fahrenheit = scale === 'f' ? temperature : toFahrenheit(temperature)
-
 		return (<div>
-			<TemperatureInput scale="c" temperature={celsius}
-				onTemperatureChange={this.handleTemperatureChangeC}></TemperatureInput>
-			<TemperatureInput scale="f" temperature={fahrenheit}
-				onTemperatureChange={this.handleTemperatureChangeF}></TemperatureInput>
-			<BoilingVerdict celsius={celsius} fahrenheit={parseFloat(fahrenheit)}/>
+			<div>
+				<input type="text"></input>
+			</div>
+			<div>
+				<input type="checkbox"></input>
+				<label>Only show product in stock</label>
+			</div>
 		</div>)
 	}
 }
 
-ReactDOM.render(<Calculator/>, document.getElementById('app'))
+function ProductRow({product}){
+	const name = product.stocked ?
+		product.name :
+		<span className="text-danger">{product.name}</span>
+	return (<tr>
+		<td>{name}</td>
+		<td>{product.price}</td>
+	</tr>)
+}
+
+function ProductCategoryRow({category}){
+	return (<tr>
+		<th colSpan="2">{category}</th>
+	</tr>)
+}
+
+function ProductTable({products}){
+	const rows = []
+	let lastCategory = null
+
+	products.forEach(product => {
+		if (product.category !== lastCategory){
+			lastCategory = product.category
+			rows.push(<ProductCategoryRow key={lastCategory} category={product.category}/>)
+		}
+		rows.push(<ProductCategoryRow key={product.name} product={product}/>)
+	})
+	return (<table className="table">
+		<thead>
+			<tr>
+				<th>Nom</th>
+				<th>Prix</th>
+			</tr>
+		</thead>
+		<tbody>{rows}</tbody>
+	</table>)
+}
+
+class FilterableProductTable extends React.Component{
+	constructor(props){
+		super(props)
+	}
+
+	render(){
+		const {product} = this.props
+		return(<div>
+			<SearchBar></SearchBar>
+			<ProductTable products={product}></ProductTable>
+		</div>)
+	}
+}
+
+ReactDOM.render(<FilterableProductTable product={PRODUCT}/>, document.getElementById('app'))
