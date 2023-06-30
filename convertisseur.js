@@ -48,8 +48,8 @@ class TemperatureInput extends React.Component{
 }
 
 function Button({type, children}){
-	const className = 'btn btn-' + {type}
-	return (<button className={className}></button>)
+	const className = 'btn btn-' + type
+	return (<button className={className}>{children}</button>)
 }
 
 function PrimaryButton({children}){
@@ -106,4 +106,5 @@ class Calculator extends React.Component{
 	}
 }
 
-ReactDOM.render(<Calculator/>, document.getElementById('app'))
+const root = ReactDOM.createRoot(document.getElementById('app'))
+root.render(<Calculator/>)
